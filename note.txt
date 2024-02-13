@@ -1,0 +1,33 @@
++++
+
+vitejs:
+Overall, Vite.js aims to streamline the development process for modern web
+applications by providing a fast and efficient build tool that takes advantage
+of the latest features and standards in web development.
+
+typescript:
+In summary, TypeScript and Vite.js complement each other well, offering a powerful
+combination for building modern web applications with strong type safety,
+efficient development workflows, and optimized production builds.
+
+frameworks beckend/frontend
+CSS
+3Js
+Django
+Bootstrap toolkit
+PostgreSQL in prod /SQLlite in dev
+
+mutipleport in same time, jeu backend frontend, etc. socketio
+chat game.
+
+leaks browser
+
+++
+
+vue.js
+js esnext
+webpack to compile mitulple browser
+ECMAScript standards
+
++
+blockchain Etherum
