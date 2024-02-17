@@ -1,9 +1,10 @@
 export class Ball {
-    constructor(scene, position, velocity) {
+    constructor(scene, position, velocity, scoreTracker) {
         this.geometry = new THREE.SphereGeometry(0.5, 32, 32);
         this.material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.scene = scene;
+        this.scoreTracker = scoreTracker; // Added scoreTracker property
 
         // Set initial position of the ball
         this.mesh.position.copy(position); // Set ball position
@@ -63,10 +64,12 @@ export class Ball {
 
         // Check for scoring
         if (this.mesh.position.x <= -10) {
-                this.reset();
+            this.scoreTracker.incrementPlayer2Score();
+            this.reset();
         }
         else if (this.mesh.position.x >= 10) {
-                this.reset();
+            this.scoreTracker.incrementPlayer1Score();
+            this.reset();
         }
     }
 
@@ -82,8 +85,6 @@ export class Ball {
 
     reset() {
         // Reset ball position and velocity
-        // this.mesh.position.copy(position);
-        // this.velocity.copy(velocity);
         this.mesh.position.set(0, 0, 0); // Reset ball position to z = 0
         this.velocity.x *= Math.random() > 0.5 ? 1 : -1; // Reset ball velocity (randomize direction)
         this.velocity.y = Math.random() * 0.1 - 0.05;
