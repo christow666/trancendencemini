@@ -4,6 +4,7 @@ import { Gui } from './Gui.js';
 import { Wall } from './Wall.js';
 import { Paddle } from './Paddle.js';
 import { ScoreTracker } from './ScoreTracker.js';
+import { EndGameManager } from './EndGameManager.js';
 
 // Set up scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -17,10 +18,14 @@ camera.lookAt(scene.position);
 
 // Create GUI and scoreTracker
 const gui = new Gui(scene);
-const scoreTracker = new ScoreTracker(gui);
+const endGameManager = new EndGameManager(scene, gui);
+const scoreTracker = new ScoreTracker(gui, endGameManager);
 
 // Create balls
 const ball = new Ball(scene, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.1, 0.1, 0), scoreTracker);
+
+endGameManager.setBall(ball);
+endGameManager.setScoreTracker(scoreTracker);
 
 // Create walls
 const topWall = new Wall(scene, 15, 0.1, 0.1, 0x0000ff, { x: 0, y: 5, z: 0 });
@@ -30,46 +35,12 @@ const bottomWall = new Wall(scene, 15, 0.1, 0.1, 0x0000ff, { x: 0, y: -5, z: 0 }
 const player1Paddle = new Paddle(scene, 1, 2, 1, 0xff0000, { x: -7, y: 0, z: 0 }, { up: 'w', down: 's' });
 const player2Paddle = new Paddle(scene, 1, 2, 1, 0xff0000, { x: 7, y: 0, z: 0 }, { up: 'o', down: 'l' });
 
-// Reset the game
-function resetGame() {
-    player1Score = 0;
-    player2Score = 0;
-    updatePlayerScores(player1Score, player2Score);
-    resetBall();
-}
-
-// Listen for the 'r' key press to reset the game
-document.addEventListener('keydown', event => {
-    if (event.key === 'r') {
-        hideMessage(); // Hide the message
-        resetGame();
-    }
-});
-
-// Define the message element
-const messageElement = document.getElementById('message');
-
-// Function to show the message with the given text
-function showMessage(text) {
-    messageElement.innerText = text;
-    messageElement.style.display = 'block'; // Show the message
-}
-
-// Function to hide the message
-function hideMessage() {
-    messageElement.style.display = 'none'; // Hide the message
-}
-
-function endGame() {
-    showMessage('Game Over! Press "r" to reset.');
-}
 
 // Update ball's position and handle collisions
 function animate() {
     requestAnimationFrame(animate);
 
     // // Update paddles' position
-    // updatePaddles();
     player1Paddle.update();
     player2Paddle.update();
 

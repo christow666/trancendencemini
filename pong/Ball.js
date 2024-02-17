@@ -64,12 +64,12 @@ export class Ball {
 
         // Check for scoring
         if (this.mesh.position.x <= -10) {
-            this.scoreTracker.incrementPlayer2Score();
             this.reset();
+            this.scoreTracker.incrementPlayer2Score();
         }
         else if (this.mesh.position.x >= 10) {
-            this.scoreTracker.incrementPlayer1Score();
             this.reset();
+            this.scoreTracker.incrementPlayer1Score();
         }
     }
 
@@ -86,7 +86,13 @@ export class Ball {
     reset() {
         // Reset ball position and velocity
         this.mesh.position.set(0, 0, 0); // Reset ball position to z = 0
-        this.velocity.x *= Math.random() > 0.5 ? 1 : -1; // Reset ball velocity (randomize direction)
+        this.velocity.x = 0.1 * (Math.random() > 0.5 ? 1 : -1); // Reset ball velocity (randomize direction)
         this.velocity.y = Math.random() * 0.1 - 0.05;
+    }
+
+    freeze() {
+        this.mesh.position.set(0, 0, 0); // Reset ball position to z = 0
+        this.velocity.x = 0;
+        this.velocity.y = 0;
     }
 }

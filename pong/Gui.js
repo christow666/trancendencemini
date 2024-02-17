@@ -4,6 +4,28 @@ export class Gui {
         this.createPongText();
         this.createOrUpdatePlayerScoreText(1, 0, { x: -5, y: 5.3, z: 0 });
         this.createOrUpdatePlayerScoreText(2, 0, { x: 4.9, y: 5.3, z: 0 });
+        this.createEndGameMessage();
+    }
+
+    createEndGameMessage() {
+        this.endGameMessageElement = document.createElement('div');
+        this.endGameMessageElement.innerText = 'Game Over! Press "r" to reset.';
+        this.endGameMessageElement.style.position = 'absolute';
+        this.endGameMessageElement.style.top = '50%';
+        this.endGameMessageElement.style.left = '50%';
+        this.endGameMessageElement.style.transform = 'translate(-50%, -50%)';
+        this.endGameMessageElement.style.fontSize = '24px';
+        this.endGameMessageElement.style.color = '#ffffff';
+        this.endGameMessageElement.style.display = 'none';
+        document.body.appendChild(this.endGameMessageElement);
+    }
+
+    showEndGameMessage() {
+        this.endGameMessageElement.style.display = 'block';
+    }
+
+    hideEndGameMessage() {
+        this.endGameMessageElement.style.display = 'none';
     }
 
     createPongText() {
