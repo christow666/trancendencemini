@@ -27,6 +27,8 @@ camera.lookAt(scene.position);
 
 // Create GUI and scoreTracker
 const gui = new Gui(scene);
+await gui.initGui();
+
 const endGameManager = new EndGameManager(scene, gui);
 const scoreTracker = new ScoreTracker(gui, endGameManager);
 
@@ -40,7 +42,7 @@ const ballPositions = [
 ];
 
 function initBalls() {
-    for (let i = 0; i < 0 ; i++){
+    for (let i = 0; i < 1000 ; i++){
         ballPositions.push({ position: new THREE.Vector3(0, 0, 0), velocity: new THREE.Vector3(0.1, 0.1, 0) });
     }
 
@@ -64,8 +66,8 @@ const topWall = new Wall(scene, 15, 0.1, 0.1, 0x0000ff, { x: 0, y: 5, z: 0 });
 const bottomWall = new Wall(scene, 15, 0.1, 0.1, 0x0000ff, { x: 0, y: -5, z: 0 });
 
 // Create paddles
-const player1Paddle = new Paddle(scene, 1, 2, 1, 0xff0000, { x: -7, y: 0, z: 0 }, { up: 'w', down: 's' });
-const player2Paddle = new Paddle(scene, 1, 2, 1, 0xff0000, { x: 7, y: 0, z: 0 }, { up: 'o', down: 'l' });
+const player1Paddle = new Paddle(scene, 1, 10, 1, 0xff0000, { x: -7, y: 0, z: 0 }, { up: 'w', down: 's' });
+const player2Paddle = new Paddle(scene, 1, 10, 1, 0xff0000, { x: 7, y: 0, z: 0 }, { up: 'o', down: 'l' });
 
 
 // Update ball's position and handle collisions

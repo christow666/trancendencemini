@@ -40,6 +40,7 @@ export class EndGameManager {
         this.balls.forEach(ball => {
             ball.reset(); // Reset all balls
         });
+        this.gui.resetScores();
     }
 
     // Cleanup method to remove event listener

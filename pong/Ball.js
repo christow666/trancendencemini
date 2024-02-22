@@ -61,32 +61,17 @@ export class Ball {
         // Check for collisions with paddles
         const currentTime = Date.now();
         if (this.checkCollision(player1Paddle) && currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown) {
-            console.log('hit2')
+            // Augment velocity each time ball hit a paddle
+            this.velocity.multiplyScalar(1.05);
 
-            // Calculate the offset from the center of the paddle
-            const offset = this.mesh.position.y - player1Paddle.position.y;
-            
-            // Normalize the offset to [-1, 1]
-            const normalizedOffset = offset / (player1Paddle.geometry.parameters.height / 2);
-            
-            // Adjust the y velocity based on the offset
-            this.velocity.y = normalizedOffset * 0.2; // Adjust the factor as needed
-            
             // Reverse direction on collision with player 1's paddle
             this.velocity.x *= -1;
             this.lastPlayer1CollisionTime = currentTime; // Update last collision time
         }
         else if (this.checkCollision(player2Paddle) && currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown) {
-            console.log('hit')
-            // Calculate the offset from the center of the paddle
-            const offset = this.mesh.position.y - player2Paddle.position.y;
-            
-            // Normalize the offset to [-1, 1]
-            const normalizedOffset = offset / (player2Paddle.geometry.parameters.height / 2);
-            
-            // Adjust the y velocity based on the offset
-            this.velocity.y = normalizedOffset * 0.2; // Adjust the factor as needed
-            
+            // Augment velocity each time ball hit a paddle
+            this.velocity.multiplyScalar(1.05);
+
             // Reverse direction on collision with player 2's paddle
             this.velocity.x *= -1;
             this.lastPlayer2CollisionTime = currentTime; // Update last collision time
@@ -120,35 +105,32 @@ export class Ball {
     
         // Check for intersection between the ray and the paddle's mesh
         const intersectsMain = this.raycaster.intersectObject(paddleMesh);
-        
+    
         // If there's an intersection, it means the ball has collided with the paddle
         if (intersectsMain.length > 0) {
             return true;
         }
     
-        // Create additional raycasters for slight offsets in the Y direction
-        const raycasterOffsetPositiveY = new THREE.Raycaster(
-            new THREE.Vector3(this.mesh.position.x, this.mesh.position.y + 0.5),
-            this.velocity.clone().normalize(),
-            0,
-            0.8
-        );
-    
-        const raycasterOffsetNegativeY = new THREE.Raycaster(
-            new THREE.Vector3(this.mesh.position.x, this.mesh.position.y - 0.5),
-            this.velocity.clone().normalize(),
-            0,
-            0.8
+        // Set up a raycaster with a slight offset in the positive Y direction
+        this.raycaster.set(
+            new THREE.Vector3(this.mesh.position.x, this.mesh.position.y + 0.5, this.mesh.position.z), 
+            this.velocity.clone().normalize()
         );
     
         // Check for intersection with paddle for raycaster with positive Y offset
-        const intersectsOffsetPositiveY = raycasterOffsetPositiveY.intersectObject(paddleMesh);
+        const intersectsOffsetPositiveY = this.raycaster.intersectObject(paddleMesh);
         if (intersectsOffsetPositiveY.length > 0) {
             return true;
         }
     
+        // Set up a raycaster with a slight offset in the negative Y direction
+        this.raycaster.set(
+            new THREE.Vector3(this.mesh.position.x, this.mesh.position.y - 0.5, this.mesh.position.z), 
+            this.velocity.clone().normalize()
+        );
+    
         // Check for intersection with paddle for raycaster with negative Y offset
-        const intersectsOffsetNegativeY = raycasterOffsetNegativeY.intersectObject(paddleMesh);
+        const intersectsOffsetNegativeY = this.raycaster.intersectObject(paddleMesh);
         if (intersectsOffsetNegativeY.length > 0) {
             return true;
         }
@@ -157,14 +139,15 @@ export class Ball {
         return false;
     }
     
-
-
     reset() {
         // Reset ball position and velocity
         this.mesh.position.set(0, 0, 0); // Reset ball position to z = 0
         this.velocity.x = 0.1 * (Math.random() > 0.5 ? 1 : -1); // Reset ball velocity (randomize direction)
-        // this.velocity.y = Math.random() * 0.1 - 0.05;
-        this.velocity.y = 0;
+        this.velocity.y = Math.random() * 0.1 - 0.05;
+        // this.velocity.y = 0;
+
+        // Ensure maximum velocity
+        this.velocity.clampLength(0, 0.05);
     }
 
     freeze() {
