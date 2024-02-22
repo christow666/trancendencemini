@@ -1,4 +1,3 @@
-
 import { Ball } from './Ball.js';
 import { Gui } from './Gui.js';
 import { Wall } from './Wall.js';
@@ -42,7 +41,7 @@ const ballPositions = [
 ];
 
 function initBalls() {
-    for (let i = 0; i < 1000 ; i++){
+    for (let i = 0; i < 0 ; i++){
         ballPositions.push({ position: new THREE.Vector3(0, 0, 0), velocity: new THREE.Vector3(0.1, 0.1, 0) });
     }
 
@@ -54,34 +53,37 @@ ballPositions.forEach(pos => {
     balls.push(ball);
 });
 
-
 // Set balls in the endgame manager
 balls.forEach(ball => endGameManager.addBall(ball));
-
-
 endGameManager.setScoreTracker(scoreTracker);
 
 // Create walls
 const topWall = new Wall(scene, 15, 0.1, 0.1, 0x0000ff, { x: 0, y: 5, z: 0 });
 const bottomWall = new Wall(scene, 15, 0.1, 0.1, 0x0000ff, { x: 0, y: -5, z: 0 });
 
-// Create paddles
-const player1Paddle = new Paddle(scene, 1, 10, 1, 0xff0000, { x: -7, y: 0, z: 0 }, { up: 'w', down: 's' });
-const player2Paddle = new Paddle(scene, 1, 10, 1, 0xff0000, { x: 7, y: 0, z: 0 }, { up: 'o', down: 'l' });
+// Define paddle properties
+const width = 1;
+const height = 5;
+const depth = 0.5;
+const color = 0xff0000;
+const controlsPlayer1 = { up: 'w', down: 's' }; // Controls for player 1
+const controlsPlayer2 = { up: 'o', down: 'l' }; // Controls for player 2
 
+// Create paddles and pass the walls parameter
+const leftPaddle = new Paddle(scene, width, height, depth, color, { x: -7, y: 0, z: 0 }, controlsPlayer1, [topWall, bottomWall]);
+const rightPaddle = new Paddle(scene, width, height, depth, color, { x: 7, y: 0, z: 0 }, controlsPlayer2, [topWall, bottomWall]);
 
 // Update ball's position and handle collisions
 function animate() {
     requestAnimationFrame(animate);
 
-    // // Update paddles' position
-    player1Paddle.update();
-    player2Paddle.update();
+    // Update paddles' position
+    leftPaddle.update();
+    rightPaddle.update();
 
     // Update ball's position
-    // ball.update(player1Paddle.mesh, player2Paddle.mesh, topWall, bottomWall);
     balls.forEach(ball => {
-        ball.update(player1Paddle.mesh, player2Paddle.mesh, topWall, bottomWall);
+        ball.update(leftPaddle.mesh, rightPaddle.mesh, topWall, bottomWall);
     });
 
     // Render the scene

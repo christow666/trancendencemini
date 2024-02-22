@@ -24,6 +24,7 @@ export class Ball {
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.scene = scene;
         this.velocity = velocity;
+        this.maxVelocity = 0.1;
         this.scoreTracker = scoreTracker; // Added scoreTracker property
 
         // Set initial position of the ball
@@ -61,21 +62,51 @@ export class Ball {
         // Check for collisions with paddles
         const currentTime = Date.now();
         if (this.checkCollision(player1Paddle) && currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown) {
-            // Augment velocity each time ball hit a paddle
-            this.velocity.multiplyScalar(1.05);
+            // Calculate the offset from the center of the paddle
+            const offset = this.mesh.position.y - player1Paddle.position.y;
+
+            // Normalize the offset to [-1, 1]
+            const normalizedOffset = offset / (player1Paddle.geometry.parameters.height / 2);
+
+            // Adjust the y velocity based on the offset
+            this.velocity.y = normalizedOffset * this.maxVelocity * 0.2;
+
+            // Increase the total velocity by 10%
+            this.maxVelocity *= 1.01;
+            this.velocity.x *= 1.01;
 
             // Reverse direction on collision with player 1's paddle
             this.velocity.x *= -1;
-            this.lastPlayer1CollisionTime = currentTime; // Update last collision time
+            this.lastPlayerCollisionTime = currentTime; // Update last collision time
+
+            // let totalVelocity = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
+            // console.log(totalVelocity);
         }
         else if (this.checkCollision(player2Paddle) && currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown) {
-            // Augment velocity each time ball hit a paddle
-            this.velocity.multiplyScalar(1.05);
+            // Calculate the offset from the center of the paddle
+            const offset = this.mesh.position.y - player2Paddle.position.y;
+
+            
+            // Normalize the offset to [-1, 1]
+            const normalizedOffset = offset / (player2Paddle.geometry.parameters.height / 2);
+
+            // Adjust the y velocity based on the offset
+            this.velocity.y = normalizedOffset * this.maxVelocity * 0.2;
+
+            // Increase the total velocity by 10%
+            this.maxVelocity *= 1.01;
+            this.velocity.x *= 1.01;
+        
 
             // Reverse direction on collision with player 2's paddle
             this.velocity.x *= -1;
-            this.lastPlayer2CollisionTime = currentTime; // Update last collision time
+            this.lastPlayerCollisionTime = currentTime; // Update last collision time
+
+            // let totalVelocity = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
+            // console.log(totalVelocity);
         }
+
+        
 
         // Check for scoring
         if (this.mesh.position.x <= -10) {
@@ -148,6 +179,7 @@ export class Ball {
 
         // Ensure maximum velocity
         this.velocity.clampLength(0, 0.05);
+        this.maxVelocity = 0.1;
     }
 
     freeze() {
