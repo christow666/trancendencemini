@@ -31,3 +31,7 @@ ECMAScript standards
 
 +
 blockchain Etherum
+
+
+
+server host the game

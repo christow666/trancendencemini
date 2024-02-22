@@ -1,13 +1,14 @@
 export class Paddle {
     constructor(scene, width, height, depth, color, position, controls) {
         this.geometry = new THREE.BoxGeometry(width, height, depth);
-        this.material = new THREE.MeshBasicMaterial({ color: color });
+        this.material = new THREE.MeshStandardMaterial({ color: color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.scene = scene;
 
         // Set initial position of the paddle
         this.mesh.position.copy(position);
 
+        
         // Add the paddle mesh to the scene
         this.scene.add(this.mesh);
 

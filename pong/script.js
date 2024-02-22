@@ -13,6 +13,15 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Add ambient light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Color, Intensity
+scene.add(ambientLight);
+
+// Add directional light
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Color, Intensity
+directionalLight.position.set(0.5, 1, 1); // Set light position (from top-right-front)
+scene.add(directionalLight);
+
 camera.position.set(0, 0, 10); // Move the camera away from the origin
 camera.lookAt(scene.position);
 
@@ -21,10 +30,33 @@ const gui = new Gui(scene);
 const endGameManager = new EndGameManager(scene, gui);
 const scoreTracker = new ScoreTracker(gui, endGameManager);
 
-// Create balls
-const ball = new Ball(scene, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.1, 0.1, 0), scoreTracker);
+// Create an array to store ball instances
+const balls = [];
 
-endGameManager.setBall(ball);
+// Create balls
+const ballPositions = [
+    { position: new THREE.Vector3(0, 0, 0), velocity: new THREE.Vector3(0.1, 0.1, 0) },
+    // Add more positions and velocities as needed
+];
+
+function initBalls() {
+    for (let i = 0; i < 0 ; i++){
+        ballPositions.push({ position: new THREE.Vector3(0, 0, 0), velocity: new THREE.Vector3(0.1, 0.1, 0) });
+    }
+
+}
+initBalls();
+
+ballPositions.forEach(pos => {
+    const ball = new Ball(scene, pos.position, pos.velocity, scoreTracker);
+    balls.push(ball);
+});
+
+
+// Set balls in the endgame manager
+balls.forEach(ball => endGameManager.addBall(ball));
+
+
 endGameManager.setScoreTracker(scoreTracker);
 
 // Create walls
@@ -45,7 +77,10 @@ function animate() {
     player2Paddle.update();
 
     // Update ball's position
-    ball.update(player1Paddle.mesh, player2Paddle.mesh, topWall, bottomWall);
+    // ball.update(player1Paddle.mesh, player2Paddle.mesh, topWall, bottomWall);
+    balls.forEach(ball => {
+        ball.update(player1Paddle.mesh, player2Paddle.mesh, topWall, bottomWall);
+    });
 
     // Render the scene
     renderer.render(scene, camera);

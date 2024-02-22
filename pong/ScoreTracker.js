@@ -10,8 +10,8 @@ export class ScoreTracker {
     incrementPlayer1Score() {
         this.player1Score++;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
-        if (this.player1Score === 3) {
-            this.endGameManager.endGame();
+        if (this.player1Score === 5000000) {
+            this.endGameManager.endGame("player 1");
         }
     }
 
@@ -19,8 +19,8 @@ export class ScoreTracker {
     incrementPlayer2Score() {
         this.player2Score++;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
-        if (this.player2Score === 3) {
-            this.endGameManager.endGame();
+        if (this.player2Score === 5000000) {
+            this.endGameManager.endGame("player 2");
         }
     }
 

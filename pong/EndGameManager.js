@@ -2,7 +2,7 @@ export class EndGameManager {
     constructor(scene, gui) {
         this.scene = scene;
         this.gui = gui;
-        this.ball = null;
+        this.balls = []; // Store multiple balls
         this.scoreTracker = null;
 
         // Bind event listener for keydown event
@@ -10,8 +10,8 @@ export class EndGameManager {
         document.addEventListener('keydown', this.handleKeyPress);
     }
     
-    setBall(ball) {
-        this.ball = ball; // Assign the provided ball instance
+    addBall(ball) {
+        this.balls.push(ball); // Add the provided ball instance to the array
     }
 
     setScoreTracker(scoreTracker) {
@@ -24,28 +24,22 @@ export class EndGameManager {
             this.resetGame();
         }
     }
-
-    // Method to display endgame message
-    showEndGameMessage() {
-        this.gui.showEndGameMessage();
-    }
-
-    // Method to hide endgame message
-    hideEndGameMessage() {
-        this.gui.hideEndGameMessage();
-    }
-
-    //End game method
-    endGame() {
-        this.ball.freeze();
-        this.showEndGameMessage();
+    
+    // End game method
+    endGame(winnerName) {
+        this.balls.forEach(ball => {
+            ball.freeze(); // Freeze all balls
+        });
+        this.gui.showEndGameMessage(winnerName);
     }
 
     // Method to reset the game
     resetGame() {
         this.scoreTracker.resetScores();
-        this.hideEndGameMessage();
-        this.ball.reset();
+        this.gui.hideEndGameMessage();
+        this.balls.forEach(ball => {
+            ball.reset(); // Reset all balls
+        });
     }
 
     // Cleanup method to remove event listener
@@ -53,3 +47,4 @@ export class EndGameManager {
         document.removeEventListener('keydown', this.handleKeyPress);
     }
 }
+

@@ -1,5 +1,6 @@
 export class Gui {
     constructor(scene) {
+        this.font = null;
         this.scene = scene;
         this.createPongText();
         this.createOrUpdatePlayerScoreText(1, 0, { x: -5, y: 5.3, z: 0 });
@@ -20,7 +21,8 @@ export class Gui {
         document.body.appendChild(this.endGameMessageElement);
     }
 
-    showEndGameMessage() {
+    showEndGameMessage(winnerName) {
+        this.endGameMessageElement.innerText = `Game Over! Winner: ${winnerName}. Press "r" to reset.`;
         this.endGameMessageElement.style.display = 'block';
     }
 
@@ -61,21 +63,34 @@ export class Gui {
         });
     }
 
-    createOrUpdatePlayerScoreText(player, score, position) {
-        const text = `Player ${player} : ${score}`;
+    createFont() {
         const fontLoader = new THREE.FontLoader();
-
+    
         return new Promise((resolve, reject) => {
             fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', (font) => {
-                const textGeometry = new THREE.TextGeometry(text, {
-                    font: font,
-                    size: 0.5, // Size of the text
-                    height: 0.1, // Thickness of the text
-                    curveSegments: 12, // Number of points on the curves
-                    bevelEnabled: false // Disable bevel for simplicity
-                });
+                this.font = font;
+                resolve(font); // Resolve the promise with the loaded font
+            }, undefined, reject); // Reject the promise if there's an error loading the font
+        });
+    }
 
-                textGeometry.computeBoundingBox();
+    
+    async createOrUpdatePlayerScoreText(player, score, position) {
+        if (!this.font) {
+            await this.createFont();
+        }
+
+        const text = `Player ${player} : ${score}`;
+            let cls = this;
+            const textGeometry = new THREE.TextGeometry(text, {
+                font: cls.font,
+                size: 0.5, // Size of the text
+                height: 0.1, // Thickness of the text
+                curveSegments: 12, // Number of points on the curves
+                bevelEnabled: false // Disable bevel for simplicity
+            });
+
+        textGeometry.computeBoundingBox();
                 const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
                 textGeometry.translate(-0.5 * textWidth, 0, 0);
 
@@ -92,10 +107,9 @@ export class Gui {
                 textMesh.name = `player${player}ScoreText`;
 
                 this.scene.add(textMesh);
-                resolve(textMesh);
-            });
-        });
     }
+
+    
 
     updatePlayerScores(player1Score, player2Score) {
         const player1ScoreTextMesh = this.scene.getObjectByName('player1ScoreText');

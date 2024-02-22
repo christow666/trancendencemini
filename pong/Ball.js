@@ -1,24 +1,52 @@
+export class BallContainer {
+    constructor(scene, balls, scoreTracker) {
+        this.scene = scene;
+        this.balls = balls.map(ball => new Ball(scene, ball.position, ball.velocity, scoreTracker));
+    }
+
+    update(player1Paddle, player2Paddle, topWall, bottomWall) {
+        this.balls.forEach(ball => {
+            ball.update(player1Paddle, player2Paddle, topWall, bottomWall);
+        });
+    }
+
+    freezeAll() {
+        this.balls.forEach(ball => {
+            ball.freeze();
+        });
+    }
+}
+
 export class Ball {
     constructor(scene, position, velocity, scoreTracker) {
         this.geometry = new THREE.SphereGeometry(0.5, 32, 32);
-        this.material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        this.material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.scene = scene;
+        this.velocity = velocity;
         this.scoreTracker = scoreTracker; // Added scoreTracker property
 
         // Set initial position of the ball
         this.mesh.position.copy(position); // Set ball position
 
         // Set initial velocity of the ball
-        this.velocity = velocity.clone();
+        this.reset();
 
         // Add the ball mesh to the scene
         this.scene.add(this.mesh);
 
         // Initialize last collision time for paddles
-        this.lastPlayer1CollisionTime = 0;
+        this.lastPlayerCollisionTime = 0;
         this.lastPlayer2CollisionTime = 0;
         this.paddleCollisionCooldown = 500; // Adjust the cooldown time as needed
+
+        // Create a raycaster instance
+        this.raycaster = new THREE.Raycaster(
+            this.position,
+            new THREE.Vector3(0, 0, 0),
+            0,
+            0.8
+        );
     }
 
     update(player1Paddle, player2Paddle, topWall, bottomWall) {
@@ -26,14 +54,15 @@ export class Ball {
         this.mesh.position.add(this.velocity);
 
         // Check for collisions with walls
-
-        if (this.mesh.position.y >= topWall.position.y || this.mesh.position.y <= bottomWall.position.y) {
+        if (this.checkCollisionWall(topWall.mesh) || this.checkCollisionWall(bottomWall.mesh)) {
             this.velocity.y *= -1; // Reverse direction on collision with top or bottom walls
         }
 
         // Check for collisions with paddles
         const currentTime = Date.now();
-        if (this.checkCollision(player1Paddle) && currentTime - this.lastPlayer1CollisionTime >= this.paddleCollisionCooldown) {
+        if (this.checkCollision(player1Paddle) && currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown) {
+            console.log('hit2')
+
             // Calculate the offset from the center of the paddle
             const offset = this.mesh.position.y - player1Paddle.position.y;
             
@@ -47,7 +76,8 @@ export class Ball {
             this.velocity.x *= -1;
             this.lastPlayer1CollisionTime = currentTime; // Update last collision time
         }
-        if (this.checkCollision(player2Paddle) && currentTime - this.lastPlayer2CollisionTime >= this.paddleCollisionCooldown) {
+        else if (this.checkCollision(player2Paddle) && currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown) {
+            console.log('hit')
             // Calculate the offset from the center of the paddle
             const offset = this.mesh.position.y - player2Paddle.position.y;
             
@@ -73,21 +103,68 @@ export class Ball {
         }
     }
 
-    checkCollision(paddleMesh) {
-        // Calculate the distance between the centers of the ball and the paddle
-        const ballPosition = this.mesh.position;
-        const paddlePosition = paddleMesh.position;
-        const distance = ballPosition.distanceTo(paddlePosition);
-
-        // If the distance is less than or equal to the sum of the ball's radius and half of the paddle's width, it means they are colliding
-        return distance <= this.geometry.parameters.radius + paddleMesh.geometry.parameters.width / 2;
+    checkCollisionWall(Mesh) {
+        // Set up the raycaster's origin and direction based on the ball's position and velocity
+        this.raycaster.set(this.mesh.position, this.velocity.clone().normalize());
+    
+        // Check for intersection between the ray and the paddle's mesh
+        const intersects = this.raycaster.intersectObject(Mesh);
+    
+        // If there's an intersection, it means the ball has collided with the paddle
+        return intersects.length > 0;
     }
+
+    checkCollision(paddleMesh) {
+        // Set up the raycaster's origin and direction based on the ball's position and velocity
+        this.raycaster.set(this.mesh.position, this.velocity.clone().normalize());
+    
+        // Check for intersection between the ray and the paddle's mesh
+        const intersectsMain = this.raycaster.intersectObject(paddleMesh);
+        
+        // If there's an intersection, it means the ball has collided with the paddle
+        if (intersectsMain.length > 0) {
+            return true;
+        }
+    
+        // Create additional raycasters for slight offsets in the Y direction
+        const raycasterOffsetPositiveY = new THREE.Raycaster(
+            new THREE.Vector3(this.mesh.position.x, this.mesh.position.y + 0.5),
+            this.velocity.clone().normalize(),
+            0,
+            0.8
+        );
+    
+        const raycasterOffsetNegativeY = new THREE.Raycaster(
+            new THREE.Vector3(this.mesh.position.x, this.mesh.position.y - 0.5),
+            this.velocity.clone().normalize(),
+            0,
+            0.8
+        );
+    
+        // Check for intersection with paddle for raycaster with positive Y offset
+        const intersectsOffsetPositiveY = raycasterOffsetPositiveY.intersectObject(paddleMesh);
+        if (intersectsOffsetPositiveY.length > 0) {
+            return true;
+        }
+    
+        // Check for intersection with paddle for raycaster with negative Y offset
+        const intersectsOffsetNegativeY = raycasterOffsetNegativeY.intersectObject(paddleMesh);
+        if (intersectsOffsetNegativeY.length > 0) {
+            return true;
+        }
+    
+        // No collision detected
+        return false;
+    }
+    
+
 
     reset() {
         // Reset ball position and velocity
         this.mesh.position.set(0, 0, 0); // Reset ball position to z = 0
         this.velocity.x = 0.1 * (Math.random() > 0.5 ? 1 : -1); // Reset ball velocity (randomize direction)
-        this.velocity.y = Math.random() * 0.1 - 0.05;
+        // this.velocity.y = Math.random() * 0.1 - 0.05;
+        this.velocity.y = 0;
     }
 
     freeze() {
