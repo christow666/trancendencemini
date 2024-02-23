@@ -1,7 +1,17 @@
+// BallContainer.js
 export class BallContainer {
-    constructor(scene, balls, scoreTracker) {
+    constructor(scene, ballConfigurations, scoreTracker) {
         this.scene = scene;
-        this.balls = balls.map(ball => new Ball(scene, ball.position, ball.velocity, scoreTracker));
+        this.balls = [];
+
+        // Initialize ball configurations
+        this.ballConfigurations = ballConfigurations;
+
+        const numberOfBallsToAdd = ballConfigurations.numberOfBalls;
+        for (let i = 0; i < numberOfBallsToAdd; i++) {
+            const ball = new Ball(scene, ballConfigurations, scoreTracker);
+            this.balls.push(ball);
+        }
     }
 
     update(player1Paddle, player2Paddle, topWall, bottomWall) {
@@ -17,18 +27,19 @@ export class BallContainer {
     }
 }
 
+// Ball.js
 export class Ball {
-    constructor(scene, position, velocity, scoreTracker) {
-        this.geometry = new THREE.SphereGeometry(0.5, 32, 32);
-        this.material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+    constructor(scene, ballConfigurations, scoreTracker) {
         this.scene = scene;
-        this.velocity = velocity;
-        this.maxVelocity = 0.1;
+        this.geometry = new THREE.SphereGeometry(ballConfigurations.size, 32, 32);
+        this.material = new THREE.MeshStandardMaterial({ color: ballConfigurations.color });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.velocity = ballConfigurations.velocity.clone();
+        this.maxVelocity = ballConfigurations.maxVelocity;
         this.scoreTracker = scoreTracker; // Added scoreTracker property
 
         // Set initial position of the ball
-        this.mesh.position.copy(position); // Set ball position
+        this.mesh.position.copy(ballConfigurations.position); // Set ball position
 
         // Set initial velocity of the ball
         this.reset();
@@ -46,9 +57,11 @@ export class Ball {
             this.position,
             new THREE.Vector3(0, 0, 0),
             0,
-            0.8
+            0.5
         );
     }
+
+
 
     update(player1Paddle, player2Paddle, topWall, bottomWall) {
         // Update ball's position

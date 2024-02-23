@@ -1,11 +1,11 @@
 export class Wall {
-    constructor(scene, width, height, depth, color, position) {
-        this.geometry = new THREE.BoxGeometry(width, height, depth);
-        this.material = new THREE.MeshBasicMaterial({ color: color });
+    constructor(scene, config) {
+        this.geometry = new THREE.BoxGeometry(config.width, config.height, config.depth);
+        this.material = new THREE.MeshBasicMaterial({ color: config.color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.position = position;
+        this.position = config.position;
         this.scene = scene;
-        this.mesh.position.copy(position);
+        this.mesh.position.copy(this.position);
         this.scene.add(this.mesh);
     }
 }

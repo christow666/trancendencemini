@@ -12,10 +12,9 @@ export class Gui {
     async initGui() {
         await this.createFont(); // Load the font
         this.createPongText("Tequila");
-        this.createPlayerNameText("Bozo", { x: -7, y: 5.5, z: 0 });
-        this.createPlayerNameText("Nick Gur", { x: 3, y: 5.5, z: 0 });
+        this.createPlayerNameText("B0zo", { x: -7, y: 5.5, z: 0 });
+        this.createPlayerNameText("Boz0", { x: 3, y: 5.5, z: 0 });
         this.createEndGameMessage();
-
         this.createScoreTextMeshes();
         this.updateScoreTextMesh(0, this.playerScores[1].position); // Update score text for player 1
         this.updateScoreTextMesh(0, this.playerScores[2].position); // Update score text for player 2
