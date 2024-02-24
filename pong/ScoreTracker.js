@@ -1,7 +1,9 @@
 export class ScoreTracker {
-    constructor(gui, endGameManager) {
+    constructor(gui, endGameManager, playerInfo) {
         this.player1Score = 0;
         this.player2Score = 0;
+        this.player1Name = playerInfo.player1Name;
+        this.player2Name = playerInfo.player2Name;
         this.gui = gui;
         this.endGameManager = endGameManager;
     }
@@ -10,8 +12,8 @@ export class ScoreTracker {
     incrementPlayer1Score() {
         this.player1Score++;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
-        if (this.player1Score === 50000) {
-            this.endGameManager.endGame("player 1");
+        if (this.player1Score === 50) {
+            this.endGameManager.endGame(this.player1Name);
         }
     }
 
@@ -19,8 +21,8 @@ export class ScoreTracker {
     incrementPlayer2Score() {
         this.player2Score++;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
-        if (this.player2Score === 50000) {
-            this.endGameManager.endGame("player 2");
+        if (this.player2Score === 50) {
+            this.endGameManager.endGame(this.player2Name);
         }
     }
 

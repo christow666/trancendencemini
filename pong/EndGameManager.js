@@ -1,51 +1,105 @@
+import { BallContainer } from './Ball.js';
+
+
+
 export class EndGameManager {
-    constructor(scene, gui) {
+    constructor(scene, gui, duplacateBall) {
         this.scene = scene;
+        this.doReset = false;
+        this.duplicateBall = duplacateBall;
+        this.lastResetTime = 0;
         this.gui = gui;
-        this.balls = []; // Store multiple balls
-        this.scoreTracker = null;
+        this.animationFrameId = null; // Declare animationFrameId at the class level
 
         // Bind event listener for keydown event
         this.handleKeyPress = this.handleKeyPress.bind(this);
         document.addEventListener('keydown', this.handleKeyPress);
     }
-    
-    addBall(ball) {
-        this.balls.push(ball); // Add the provided ball instance to the array
+
+    setBallConfigurations(ballConfigurations) {
+        this.ballConfigurations = ballConfigurations; // Assign the provided scoreTracker instance
     }
 
     setScoreTracker(scoreTracker) {
         this.scoreTracker = scoreTracker; // Assign the provided scoreTracker instance
     }
+    
+    setBallContainer(ballContainer) {
+        this.ballContainer = ballContainer; // Assign the provided ballContainer instance
+    }
 
     // Method to handle key press event
     handleKeyPress(event) {
         if (event.key === 'r') {
-            this.resetGame();
+            console.log("r pressed");
+            const currentTime = Date.now();
+            // Check if at least one second has elapsed since the last reset
+            if (currentTime - this.lastResetTime >= 10) {
+                this.doReset = true;
+                this.lastResetTime = currentTime; // Update the last reset time
+            }
         }
     }
+
     
     // End game method
     endGame(winnerName) {
-        this.balls.forEach(ball => {
+        this.ballContainer.balls.forEach(ball => {
             ball.freeze(); // Freeze all balls
         });
         this.gui.showEndGameMessage(winnerName);
     }
 
-    // Method to reset the game
     resetGame() {
+        console.log("Resetting the game...");
+    
+        if (this.duplicateBall){
+            if (this.ballContainer) {
+                const ballsToRemove = this.ballContainer.balls.length - this.ballConfigurations.numberOfBalls;
+                for (let i = 0; i < ballsToRemove; i++) {
+                    const ball = this.ballContainer.balls.pop(); // Remove ball from the end of the array
+                    ball.removeFromContainer(); // Custom method to remove ball from container and scene
+                }
+
+                // Reset remaining balls
+                this.ballContainer.balls.forEach(ball => {
+                    ball.reset(); // Reset ball properties
+                });
+            }
+        }
+        else {
+            // Reset existing balls instead of removing them
+            if (this.ballContainer) {
+                this.ballContainer.balls.forEach(ball => {
+                    ball.reset(); // Reset ball properties
+                });
+            }
+        }
+    
+        // Reset the scores using the ScoreTracker
         this.scoreTracker.resetScores();
+    
+        // Update GUI
         this.gui.hideEndGameMessage();
-        this.balls.forEach(ball => {
-            ball.reset(); // Reset all balls
-        });
         this.gui.resetScores();
+        this.doReset = false;
+
+    }
+
+    removeFromContainer(ball) {
+        // Remove the ball from the container's array
+        const index = this.ballContainer.balls.indexOf(ball);
+        if (index !== -1) {
+            this.ballContainer.balls.splice(index, 1);
+        }
+
+        // Remove the ball from the scene
+        this.scene.remove(ball.mesh);
     }
 
     // Cleanup method to remove event listener
     cleanup() {
         document.removeEventListener('keydown', this.handleKeyPress);
     }
+    
 }
-

@@ -20,7 +20,7 @@ export const objectConfigs = {
     paddles: {
         leftPaddle: {
             width: 1,
-            height: 2,
+            height: 10,
             depth: 1,
             speed: 0.1,
             color: 0xff0000,
@@ -29,7 +29,7 @@ export const objectConfigs = {
         },
         rightPaddle: {
             width: 1,
-            height: 2,
+            height: 10,
             depth: 1,
             speed: 0.1,
             color: 0xff0000,
@@ -43,6 +43,11 @@ export const objectConfigs = {
         size: 0.5,
         color: 0xff0000,
         maxVelocity: 0.1,
-        numberOfBalls: 1
+        numberOfBalls: 1,
+        duplicateBall: 1
+    },
+    playerInfo: {
+        player1Name: "TheYeti",
+        player2Name: "TheLoser"
     }
 };

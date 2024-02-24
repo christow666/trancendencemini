@@ -1,10 +1,12 @@
 export class Gui {
-    constructor(scene) {
+    constructor(scene, playerInfo) {
         this.font = null;
         this.scene = scene;
+        this.player1Name = playerInfo.player1Name;
+        this.player2Name = playerInfo.player2Name;
         this.numberMeshes = []; // Initialize numberMeshes as an empty array
         this.playerScores = {
-            1: { score: 0, position: { x: -4.5, y: 5.5, z: 0 } }, // Initial score and position for player 1
+            1: { score: 0, position: { x: -4, y: 5.5, z: 0 } }, // Initial score and position for player 1
             2: { score: 0, position: { x: 6.5, y: 5.5, z: 0 } }   // Initial score and position for player 2
         }; 
     }
@@ -12,8 +14,8 @@ export class Gui {
     async initGui() {
         await this.createFont(); // Load the font
         this.createPongText("Tequila");
-        this.createPlayerNameText("B0zo", { x: -7, y: 5.5, z: 0 });
-        this.createPlayerNameText("Boz0", { x: 3, y: 5.5, z: 0 });
+        this.createPlayerNameText(this.player1Name, { x: -7, y: 5.5, z: 0 });
+        this.createPlayerNameText(this.player2Name, { x: 3, y: 5.5, z: 0 });
         this.createEndGameMessage();
         this.createScoreTextMeshes();
         this.updateScoreTextMesh(0, this.playerScores[1].position); // Update score text for player 1
