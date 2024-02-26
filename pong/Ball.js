@@ -37,9 +37,10 @@ export class Ball {
             0,
             ballConfigurations.size
         );
+
+        // Set duplicateBall paramaters
+        this.duplicateCounter = 0;
     }
-
-
 
     update(player1Paddle, player2Paddle, topWall, bottomWall) {
         // Update ball's position
@@ -52,11 +53,19 @@ export class Ball {
     
         // Check for collisions with paddles
         const currentTime = Date.now();
-        if (this.checkPaddleCollision(player1Paddle, currentTime) && this.canCollide(currentTime)) {
-            this.handlePaddleCollision(player1Paddle, currentTime);
-        } else if (this.checkPaddleCollision(player2Paddle, currentTime) && this.canCollide(currentTime)) {
-            this.handlePaddleCollision(player2Paddle, currentTime);
+        if (this.checkPaddleCollision(player1Paddle, currentTime)) {
+            this.collisionManager.handlePaddleCollision(player1Paddle, currentTime, this.mesh, this.velocity, this.maxVelocity);
+            if (this.duplicateBall) {
+                this.manageDuplicateBall();
+            }
         }
+        else if (this.checkPaddleCollision(player2Paddle, currentTime)) {
+            this.collisionManager.handlePaddleCollision(player2Paddle, currentTime, this.mesh, this.velocity, this.maxVelocity);
+            if (this.duplicateBall) {
+                this.manageDuplicateBall();
+            }
+        }
+
         // Check for scoring
         if (this.mesh.position.x <= -10) {
             this.reset();
@@ -69,122 +78,62 @@ export class Ball {
     }
     
     checkWallCollision(wallMesh) {
-        return this.checkCollision(wallMesh);
-    }
+        if (!this.collisionManager) {
+            console.error("Collision manager is not defined.");
+            return false; // Exit early if collision manager is not defined
+        }
+        
+        if (!wallMesh || !this.mesh || !this.velocity || !this.raycaster) {
+            console.error("One or more required parameters are undefined.");
+            console.log("wallMesh:", wallMesh);
+            console.log("this.mesh:", this.mesh);
+            console.log("this.velocity:", this.velocity);
+            console.log("this.raycaster:", this.raycaster);
+            return false; // Exit early if any required parameter is undefined
+        }
     
+        return this.collisionManager.checkCollisionWall(wallMesh, this.mesh, this.velocity, this.raycaster);
+    }
+
     checkPaddleCollision(paddle, currentTime) {
-        return this.checkCollision(paddle) && this.canCollide(currentTime);
+        return this.collisionManager.checkCollision(paddle, this.mesh, this.velocity, this.raycaster) && this.canCollide(currentTime);
     }
-    
+
     canCollide(currentTime) {
         return currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown;
     }
-    
-    handlePaddleCollision(paddle, currentTime) {
-        const offset = this.calculateOffset(paddle);
-        const normalizedOffset = this.normalizeOffset(offset, paddle.geometry.parameters.height);
-        this.adjustVelocity(normalizedOffset);
-        this.adjustMaxVelocity();
-        this.reverseXVelocity();
-        this.lastPlayerCollisionTime = currentTime;
-        if (this.duplicateBall) {
-            this.createOppositeBall();
+
+    manageDuplicateBall() {
+        if (this.duplicateCounter === 0) {
+            this.mesh.material.color.set(0xffff00); // Set the color to yellow
+            this.duplicateCounter++;
         }
-    }
-    
-    calculateOffset(paddle) {
-        return this.mesh.position.y - paddle.position.y;
-    }
-    
-    normalizeOffset(offset, paddleHeight) {
-        return offset / (paddleHeight / 2);
-    }
-    
-    adjustVelocity(normalizedOffset) {
-        this.velocity.y = normalizedOffset * this.maxVelocity * 0.2;
-        this.velocity.x *= 1.01;
-    }
-    
-    adjustMaxVelocity() {
-        this.maxVelocity *= 1.01;
-    }
-    
-    reverseXVelocity() {
-        this.velocity.x *= -1;
-    }
-    
-    checkCollisionWall(Mesh) {
-        // Set up the raycaster's origin and direction based on the ball's position and velocity
-        this.raycaster.set(this.mesh.position, this.velocity.clone().normalize());
-    
-        // Check for intersection between the ray and the paddle's mesh
-        const intersects = this.raycaster.intersectObject(Mesh);
-    
-        // If there's an intersection, it means the ball has collided with the paddle
-        return intersects.length > 0;
-    }
-
-    checkCollision(paddleMesh) {
-        // Set up the raycaster's origin and direction based on the ball's position and velocity
-        this.raycaster.set(this.mesh.position, this.velocity.clone().normalize());
-    
-        // Check for intersection between the ray and the paddle's mesh
-        const intersectsMain = this.raycaster.intersectObject(paddleMesh);
-    
-        // If there's an intersection, it means the ball has collided with the paddle
-        if (intersectsMain.length > 0) {
-            return true;
+        else if (this.duplicateCounter === 1) {
+            this.mesh.material.color.set(0x00ff00); // Set the color to green
+            this.duplicateCounter++;
         }
-    
-        // Set up a raycaster with a slight offset in the positive Y direction
-        this.raycaster.set(
-            new THREE.Vector3(this.mesh.position.x, this.mesh.position.y + 0.5, this.mesh.position.z), 
-            this.velocity.clone().normalize()
-        );
-    
-        // Check for intersection with paddle for raycaster with positive Y offset
-        const intersectsOffsetPositiveY = this.raycaster.intersectObject(paddleMesh);
-        if (intersectsOffsetPositiveY.length > 0) {
-            return true;
+        else {
+            this.mesh.material.color.set(0xff0000);
+            // Create a new ball by cloning the current ball
+            const oppositeBall = new Ball(this.scene, {
+                position: this.mesh.position.clone(), // Clone current ball's position
+                velocity: new THREE.Vector3(-this.velocity.x, -this.velocity.y, 0), // Reverse y velocity
+                size: this.geometry.parameters.radius, // Use current ball's size
+                color: this.material.color.getHex(), // Use current ball's color
+                maxVelocity: this.maxVelocity, // Use current ball's max velocity
+                duplicateBall: this.duplicateBall,
+            }, this.scoreTracker, this.container, this.collisionManager);
+            const randomMultiplier = 0.75 + Math.random() * 0.2; // Random number between 0.75 and 1.25
+            oppositeBall.velocity.x = this.velocity.x * randomMultiplier;
+            oppositeBall.velocity.y = -this.velocity.y * randomMultiplier + 0.005;
+
+            // Add the new ball to the container
+            this.container.balls.push(oppositeBall);
+
+            // Add the new ball to the scene
+            this.scene.add(oppositeBall.mesh);
+            this.duplicateCounter = 0;
         }
-    
-        // Set up a raycaster with a slight offset in the negative Y direction
-        this.raycaster.set(
-            new THREE.Vector3(this.mesh.position.x, this.mesh.position.y - 0.5, this.mesh.position.z), 
-            this.velocity.clone().normalize()
-        );
-    
-        // Check for intersection with paddle for raycaster with negative Y offset
-        const intersectsOffsetNegativeY = this.raycaster.intersectObject(paddleMesh);
-        if (intersectsOffsetNegativeY.length > 0) {
-            return true;
-        }
-    
-        // No collision detected
-        return false;
-    }
-
-    createOppositeBall() {
-    // Create a new ball by cloning the current ball
-        const oppositeBall = new Ball(this.scene, {
-            position: this.mesh.position.clone(), // Clone current ball's position
-            velocity: new THREE.Vector3(-this.velocity.x, -this.velocity.y, 0), // Reverse y velocity
-            size: this.geometry.parameters.radius, // Use current ball's size
-            color: this.material.color.getHex(), // Use current ball's color
-            maxVelocity: this.maxVelocity, // Use current ball's max velocity
-            duplicateBall: this.duplicateBall,
-            collisionManager: this.collisionManager,
-        }, this.scoreTracker, this.container);
-        const randomMultiplier = 0.75 + Math.random() * 0.2; // Random number between 0.75 and 1.25
-        oppositeBall.velocity.x = this.velocity.x * randomMultiplier;
-        oppositeBall.velocity.y = -this.velocity.y * randomMultiplier + 0.005;
-
-        // Add the new ball to the container
-        this.container.balls.push(oppositeBall);
-
-        // Add the new ball to the scene
-        this.scene.add(oppositeBall.mesh);
-
     }
 
     removeFromContainer() {
@@ -208,6 +157,8 @@ export class Ball {
         // Ensure maximum velocity
         this.velocity.clampLength(0, 0.05);
         this.maxVelocity = 0.1;
+        this.duplicateCounter = 0;
+        this.mesh.material.color.set(0xff0000);
     }
 
     freeze() {

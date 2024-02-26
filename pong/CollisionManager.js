@@ -6,25 +6,16 @@ export class CollisionManager {
         this.raycaster = new THREE.Raycaster();
     }
 
-    handdleColision(){
-
-    }
-
     checkCollisionWall(mesh, ballMesh, velocity, raycaster) {
-    // Set up the raycaster's origin and direction based on the ball's position and velocity
-    console.log('Raycaster:', raycaster);
-    console.log('Ball mesh position:', ballMesh.position);
-    console.log('Velocity:', velocity);
-    raycaster.set(ballMesh.position, velocity.clone().normalize());
-    console.log('Raycaster after setting:', raycaster);
+        // Set up the raycaster's origin and direction based on the ball's position and velocity
+        raycaster.set(ballMesh.position, velocity.clone().normalize());
 
-    // Check for intersection between the ray and the wall's mesh
-    const intersects = raycaster.intersectObject(mesh);
-    console.log('Intersects:', intersects);
+        // Check for intersection between the ray and the wall's mesh
+        const intersects = raycaster.intersectObject(mesh);
 
-    // If there's an intersection, it means the ball has collided with the wall
-    return intersects.length > 0;
-}
+        // If there's an intersection, it means the ball has collided with the wall
+        return intersects.length > 0;
+    }
 
     checkCollision(mesh, ballMesh, velocity, raycaster) {
         // Set up the raycaster's origin and direction based on the ball's position and velocity
@@ -64,6 +55,36 @@ export class CollisionManager {
     
         // No collision detected
         return false;
+    }
+
+    handlePaddleCollision(paddle, currentTime, ballMesh, ballVelocity, maxVelocity) {
+        const offset = this.calculateOffset(paddle, ballMesh);
+        const normalizedOffset = this.normalizeOffset(offset, paddle.geometry.parameters.height);
+        this.adjustVelocity(normalizedOffset, ballVelocity, maxVelocity);
+        this.adjustMaxVelocity(maxVelocity);
+        this.reverseXVelocity(ballVelocity);
+        this.lastPlayerCollisionTime = currentTime;
+    }
+    
+    calculateOffset(paddle, ballMesh) {
+        return ballMesh.position.y - paddle.position.y;
+    }
+    
+    normalizeOffset(offset, paddleHeight) {
+        return offset / (paddleHeight / 2);
+    }
+    
+    adjustVelocity(normalizedOffset, ballVelocity, maxVelocity) {
+        ballVelocity.y = normalizedOffset * maxVelocity * 0.2;
+        ballVelocity.x *= 1.01;
+    }
+    
+    adjustMaxVelocity(maxVelocity) {
+        maxVelocity *= 1.01;
+    }
+    
+    reverseXVelocity(ballVelocity) {
+        ballVelocity.x *= -1;
     }
 
 }
