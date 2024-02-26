@@ -1,7 +1,3 @@
-import { BallContainer } from './Ball.js';
-
-
-
 export class EndGameManager {
     constructor(scene, gui, duplacateBall) {
         this.scene = scene;
@@ -31,7 +27,6 @@ export class EndGameManager {
     // Method to handle key press event
     handleKeyPress(event) {
         if (event.key === 'r') {
-            console.log("r pressed");
             const currentTime = Date.now();
             // Check if at least one second has elapsed since the last reset
             if (currentTime - this.lastResetTime >= 10) {
@@ -51,8 +46,6 @@ export class EndGameManager {
     }
 
     resetGame() {
-        console.log("Resetting the game...");
-    
         if (this.duplicateBall){
             if (this.ballContainer) {
                 const ballsToRemove = this.ballContainer.balls.length - this.ballConfigurations.numberOfBalls;

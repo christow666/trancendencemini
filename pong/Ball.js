@@ -1,56 +1,3 @@
-import { CollisionManager } from './CollisionManager.js';
-
-// BallContainer.js
-export class BallContainer {
-    constructor(scene, ballConfigurations, scoreTracker) {
-        this.scene = scene;
-        this.balls = [];
-        this.collisionManager = new CollisionManager();
-
-        // Initialize ball configurations
-        this.ballConfigurations = ballConfigurations;
-
-        const numberOfBallsToAdd = ballConfigurations.numberOfBalls;
-        for (let i = 0; i < numberOfBallsToAdd; i++) {
-            const ball = new Ball(scene, ballConfigurations, scoreTracker, this, this.collisionManager); // Pass the collisionManager
-            this.balls.push(ball);
-        }
-    }
-
-    initBallPool(poolSize) {
-        for (let i = 0; i < poolSize; i++) {
-            const ball = new Ball(this.scene, this.ballConfigurations, this.scoreTracker, this, this.collisionManager);
-            this.ballPool.push(ball);
-        }
-    }
-
-    getBallFromPool() {
-        if (this.ballPool.length > 0) {
-            return this.ballPool.pop();
-        } else {
-            console.warn('Ball pool exhausted. Creating new ball.');
-            return new Ball(this.scene, this.ballConfigurations, this.scoreTracker, this, this.collisionManager);
-        }
-    }
-
-    releaseBallToPool(ball) {
-        ball.reset(); // Reset ball properties
-        this.ballPool.push(ball); // Return ball to pool
-    }
-
-    update(player1Paddle, player2Paddle, topWall, bottomWall) {
-        this.balls.forEach(ball => {
-            ball.update(player1Paddle, player2Paddle, topWall, bottomWall);
-        });
-    }
-
-    freezeAll() {
-        this.balls.forEach(ball => {
-            ball.freeze();
-        });
-    }
-}
-
 // Ball.js
 export class Ball {
     constructor(scene, ballConfigurations, scoreTracker, container, collisionManager) {
@@ -97,68 +44,19 @@ export class Ball {
     update(player1Paddle, player2Paddle, topWall, bottomWall) {
         // Update ball's position
         this.mesh.position.add(this.velocity);
-
+    
         // Check for collisions with walls
-        if (this.checkCollisionWall(topWall.mesh, this.mesh, this.velocity, this.raycaster) || this.checkCollisionWall(bottomWall.mesh, this.mesh, this.velocity, this.raycaster)) {
+        if (this.checkWallCollision(topWall.mesh) || this.checkWallCollision(bottomWall.mesh)) {
             this.velocity.y *= -1; // Reverse direction on collision with top or bottom walls
         }
-
+    
         // Check for collisions with paddles
         const currentTime = Date.now();
-        if (this.checkCollision(player1Paddle) && currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown) {
-
-
-            // Calculate the offset from the center of the paddle
-            const offset = this.mesh.position.y - player1Paddle.position.y;
-
-            // Normalize the offset to [-1, 1]
-            const normalizedOffset = offset / (player1Paddle.geometry.parameters.height / 2);
-
-            // Adjust the y velocity based on the offset
-            this.velocity.y = normalizedOffset * this.maxVelocity * 0.2;
-
-            // Increase the total velocity by 10%
-            this.maxVelocity *= 1.01;
-            this.velocity.x *= 1.01;
-
-            // Reverse direction on collision with player 1's paddle
-            this.velocity.x *= -1;
-            this.lastPlayerCollisionTime = currentTime; // Update last collision time
-
-            if (this.duplicateBall)
-                this.createOppositeBall();
+        if (this.checkPaddleCollision(player1Paddle, currentTime) && this.canCollide(currentTime)) {
+            this.handlePaddleCollision(player1Paddle, currentTime);
+        } else if (this.checkPaddleCollision(player2Paddle, currentTime) && this.canCollide(currentTime)) {
+            this.handlePaddleCollision(player2Paddle, currentTime);
         }
-        else if (this.checkCollision(player2Paddle) && currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown) {
-
-            
-            
-            // Calculate the offset from the center of the paddle
-            const offset = this.mesh.position.y - player2Paddle.position.y;
-
-            
-            // Normalize the offset to [-1, 1]
-            const normalizedOffset = offset / (player2Paddle.geometry.parameters.height / 2);
-
-            // Adjust the y velocity based on the offset
-            this.velocity.y = normalizedOffset * this.maxVelocity * 0.2;
-
-            // Increase the total velocity by 10%
-            this.maxVelocity *= 1.01;
-            this.velocity.x *= 1.01;
-        
-
-            // Reverse direction on collision with player 2's paddle
-            this.velocity.x *= -1;
-            this.lastPlayerCollisionTime = currentTime; // Update last collision time
-
-            if (this.duplicateBall)
-                this.createOppositeBall();
-            // let totalVelocity = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
-            // console.log(totalVelocity);
-        }
-
-        
-
         // Check for scoring
         if (this.mesh.position.x <= -10) {
             this.reset();
@@ -169,7 +67,52 @@ export class Ball {
             this.scoreTracker.incrementPlayer1Score();
         }
     }
-
+    
+    checkWallCollision(wallMesh) {
+        return this.checkCollision(wallMesh);
+    }
+    
+    checkPaddleCollision(paddle, currentTime) {
+        return this.checkCollision(paddle) && this.canCollide(currentTime);
+    }
+    
+    canCollide(currentTime) {
+        return currentTime - this.lastPlayerCollisionTime >= this.paddleCollisionCooldown;
+    }
+    
+    handlePaddleCollision(paddle, currentTime) {
+        const offset = this.calculateOffset(paddle);
+        const normalizedOffset = this.normalizeOffset(offset, paddle.geometry.parameters.height);
+        this.adjustVelocity(normalizedOffset);
+        this.adjustMaxVelocity();
+        this.reverseXVelocity();
+        this.lastPlayerCollisionTime = currentTime;
+        if (this.duplicateBall) {
+            this.createOppositeBall();
+        }
+    }
+    
+    calculateOffset(paddle) {
+        return this.mesh.position.y - paddle.position.y;
+    }
+    
+    normalizeOffset(offset, paddleHeight) {
+        return offset / (paddleHeight / 2);
+    }
+    
+    adjustVelocity(normalizedOffset) {
+        this.velocity.y = normalizedOffset * this.maxVelocity * 0.2;
+        this.velocity.x *= 1.01;
+    }
+    
+    adjustMaxVelocity() {
+        this.maxVelocity *= 1.01;
+    }
+    
+    reverseXVelocity() {
+        this.velocity.x *= -1;
+    }
+    
     checkCollisionWall(Mesh) {
         // Set up the raycaster's origin and direction based on the ball's position and velocity
         this.raycaster.set(this.mesh.position, this.velocity.clone().normalize());
@@ -225,13 +168,16 @@ export class Ball {
     // Create a new ball by cloning the current ball
         const oppositeBall = new Ball(this.scene, {
             position: this.mesh.position.clone(), // Clone current ball's position
-            velocity: new THREE.Vector3(this.velocity.x, -this.velocity.y, 0), // Reverse y velocity
+            velocity: new THREE.Vector3(-this.velocity.x, -this.velocity.y, 0), // Reverse y velocity
             size: this.geometry.parameters.radius, // Use current ball's size
             color: this.material.color.getHex(), // Use current ball's color
             maxVelocity: this.maxVelocity, // Use current ball's max velocity
             duplicateBall: this.duplicateBall,
             collisionManager: this.collisionManager,
         }, this.scoreTracker, this.container);
+        const randomMultiplier = 0.75 + Math.random() * 0.2; // Random number between 0.75 and 1.25
+        oppositeBall.velocity.x = this.velocity.x * randomMultiplier;
+        oppositeBall.velocity.y = -this.velocity.y * randomMultiplier + 0.005;
 
         // Add the new ball to the container
         this.container.balls.push(oppositeBall);
@@ -239,7 +185,6 @@ export class Ball {
         // Add the new ball to the scene
         this.scene.add(oppositeBall.mesh);
 
-        // return oppositeBall; // Return the new ball
     }
 
     removeFromContainer() {

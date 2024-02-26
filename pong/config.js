@@ -43,8 +43,8 @@ export const objectConfigs = {
         size: 0.5,
         color: 0xff0000,
         maxVelocity: 0.1,
-        numberOfBalls: 1,
-        duplicateBall: 1
+        numberOfBalls: 5,
+        duplicateBall: 0
     },
     playerInfo: {
         player1Name: "TheYeti",

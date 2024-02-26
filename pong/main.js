@@ -1,4 +1,4 @@
-import { BallContainer } from './Ball.js';
+import { BallContainer } from './BallContainer.js';
 import { Gui } from './Gui.js';
 import { Wall } from './Wall.js';
 import { Paddle } from './Paddle.js';
