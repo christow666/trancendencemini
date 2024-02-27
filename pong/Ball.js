@@ -40,9 +40,24 @@ export class Ball {
 
         // Set duplicateBall paramaters
         this.duplicateCounter = 0;
+        this.soundEffect1 = new Audio('./sound1.mp3');
+        this.soundEffect2 = new Audio('./sound2.mp3');
+
+
+    }
+
+    // Function to play sound effect 1
+    playSoundEffect1() {
+        this.soundEffect1.play();
+    }
+
+    // Function to play sound effect 2
+    playSoundEffect2() {
+        this.soundEffect2.play();
     }
 
     update(player1Paddle, player2Paddle, topWall, bottomWall) {
+
         // Update ball's position
         this.mesh.position.add(this.velocity);
     
@@ -54,26 +69,31 @@ export class Ball {
         // Check for collisions with paddles
         const currentTime = Date.now();
         if (this.checkPaddleCollision(player1Paddle, currentTime)) {
+            
             this.collisionManager.handlePaddleCollision(player1Paddle, currentTime, this.mesh, this.velocity, this.maxVelocity);
             if (this.duplicateBall) {
                 this.manageDuplicateBall();
             }
+            // this.playSoundEffect1();
         }
         else if (this.checkPaddleCollision(player2Paddle, currentTime)) {
             this.collisionManager.handlePaddleCollision(player2Paddle, currentTime, this.mesh, this.velocity, this.maxVelocity);
             if (this.duplicateBall) {
                 this.manageDuplicateBall();
             }
+            // this.playSoundEffect2();
         }
 
         // Check for scoring
         if (this.mesh.position.x <= -10) {
-            this.reset();
-            this.scoreTracker.incrementPlayer2Score();
+            // this.reset();
+            if (this.scoreTracker.incrementPlayer2Score(this.duplicateCounter))
+                this.reset();
         }
         else if (this.mesh.position.x >= 10) {
-            this.reset();
-            this.scoreTracker.incrementPlayer1Score();
+            // this.reset();
+            if (this.scoreTracker.incrementPlayer1Score(this.duplicateCounter))
+                this.reset();
         }
     }
     
@@ -125,7 +145,7 @@ export class Ball {
             }, this.scoreTracker, this.container, this.collisionManager);
             const randomMultiplier = 0.75 + Math.random() * 0.2; // Random number between 0.75 and 1.25
             oppositeBall.velocity.x = this.velocity.x * randomMultiplier;
-            oppositeBall.velocity.y = -this.velocity.y * randomMultiplier + 0.005;
+            oppositeBall.velocity.y = -this.velocity.y;
 
             // Add the new ball to the container
             this.container.balls.push(oppositeBall);

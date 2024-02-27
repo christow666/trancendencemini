@@ -13,7 +13,7 @@ export class Gui {
 
     async initGui() {
         await this.createFont(); // Load the font
-        this.createPongText("Tequila");
+        this.createPongText("DupliPong");
         this.createPlayerNameText(this.player1Name, { x: -7, y: 5.5, z: 0 });
         this.createPlayerNameText(this.player2Name, { x: 3, y: 5.5, z: 0 });
         this.createEndGameMessage();

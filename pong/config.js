@@ -47,7 +47,7 @@ export const objectConfigs = {
         duplicateBall: 1
     },
     playerInfo: {
-        player1Name: "TheYeti",
-        player2Name: "TheLoser"
+        player1Name: "NANI",
+        player2Name: "Twaza"
     }
 };

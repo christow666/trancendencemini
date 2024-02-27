@@ -9,21 +9,29 @@ export class ScoreTracker {
     }
 
     // Method to increment player 1's score
-    incrementPlayer1Score() {
-        this.player1Score++;
+    incrementPlayer1Score(ballValue) {
+        // this.player1Score++;
+        this.player1Score+= ballValue;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
-        if (this.player1Score === 50) {
+        if (this.player1Score >= 50) {
+            console.log("p1 win")
             this.endGameManager.endGame(this.player1Name);
+            return 0;
         }
+        return 1;
     }
 
     // Method to increment player 2's score
-    incrementPlayer2Score() {
-        this.player2Score++;
+    incrementPlayer2Score(ballValue) {
+        // this.player2Score++;
+        this.player2Score+= ballValue;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
-        if (this.player2Score === 50) {
+        if (this.player2Score >= 50) {
+            console.log("p2 win")
             this.endGameManager.endGame(this.player2Name);
+            return 0
         }
+        return 1
     }
 
     // Method to reset the scores

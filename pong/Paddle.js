@@ -75,7 +75,6 @@ export class Paddle {
 
             // Check for collision with the current wall
             if (intersects.length > 0) {
-                console.log("collision detected");
                 return true; // Collision detected with this wall
             }
         }

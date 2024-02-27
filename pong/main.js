@@ -82,5 +82,6 @@ function animate() {
     }
 }
 
+
 // Call animate
 animate();
