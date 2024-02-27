@@ -23,19 +23,6 @@ export class EndGameManager {
     setBallContainer(ballContainer) {
         this.ballContainer = ballContainer; // Assign the provided ballContainer instance
     }
-
-    // // Method to handle key press event
-    // handleKeyPress(event) {
-    //     if (event.key === 'r') {
-    //         const currentTime = Date.now();
-    //         // Check if at least one second has elapsed since the last reset
-    //         if (currentTime - this.lastResetTime >= 10) {
-    //             this.doReset = true;
-    //             this.lastResetTime = currentTime; // Update the last reset time
-    //         }
-    //     }
-    // }
-
     
     // End game method
     endGame(winnerName) {

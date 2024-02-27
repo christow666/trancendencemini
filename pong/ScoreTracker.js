@@ -10,7 +10,6 @@ export class ScoreTracker {
 
     // Method to increment player 1's score
     incrementPlayer1Score(ballValue, isDuplicateMode) {
-        // this.player1Score++;
         if (isDuplicateMode)
             this.player1Score+= ballValue;
         else
@@ -26,7 +25,6 @@ export class ScoreTracker {
 
     // Method to increment player 2's score
     incrementPlayer2Score(ballValue, isDuplicateMode) {
-        // this.player2Score++;
         if (isDuplicateMode)
             this.player2Score+= ballValue;
         else

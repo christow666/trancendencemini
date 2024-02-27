@@ -42,20 +42,12 @@ export class Ball {
         this.duplicateCounter = 0;
 
         // Set audio
-        this.soundBozo = new Audio('./bozo.mp3');
-        // this.soundEffect2 = new Audio('./sound2.mp3');
-
-
+        // this.soundBozo = new Audio('./bozo.mp3');
     }
 
     // Function to play sound effect 1
     playSoundBozo() {
         this.soundBozo.play();
-    }
-
-    // Function to play sound effect 2
-    playSoundEffect2() {
-        this.soundEffect2.play();
     }
 
     update(player1Paddle, player2Paddle, topWall, bottomWall) {
@@ -90,13 +82,13 @@ export class Ball {
         if (this.mesh.position.x <= -10) {
             if (this.scoreTracker.incrementPlayer2Score(this.duplicateCounter, this.duplicateBall))
                 this.reset();
-            this.playSoundBozo();
+            // this.playSoundBozo();
             
         }
         else if (this.mesh.position.x >= 10) {
             if (this.scoreTracker.incrementPlayer1Score(this.duplicateCounter, this.duplicateBall))
                 this.reset();
-             this.playSoundBozo();
+            //  this.playSoundBozo();
         }
     }
     

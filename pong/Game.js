@@ -19,6 +19,7 @@ export class Game {
         this.rightPaddle = null;
         this.topWall = null;
         this.bottomWall = null;
+        this.isPaused = false;
     }
 
     async initialize(newConfig) {
@@ -49,8 +50,6 @@ export class Game {
         this.leftPaddle = new Paddle(this.scene, newConfig.paddles.leftPaddle, [this.topWall, this.bottomWall]);
         this.rightPaddle = new Paddle(this.scene, newConfig.paddles.rightPaddle, [this.topWall, this.bottomWall]);
 
-        // Call the callback function after initialization
-        // callback();
     }
 
     clearScene() {
@@ -90,7 +89,6 @@ export class Game {
         this.topWall = null;
         this.bottomWall = null;
     }
-    
 }
 
 
