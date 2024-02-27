@@ -40,15 +40,17 @@ export class Ball {
 
         // Set duplicateBall paramaters
         this.duplicateCounter = 0;
-        this.soundEffect1 = new Audio('./sound1.mp3');
-        this.soundEffect2 = new Audio('./sound2.mp3');
+
+        // Set audio
+        this.soundBozo = new Audio('./bozo.mp3');
+        // this.soundEffect2 = new Audio('./sound2.mp3');
 
 
     }
 
     // Function to play sound effect 1
-    playSoundEffect1() {
-        this.soundEffect1.play();
+    playSoundBozo() {
+        this.soundBozo.play();
     }
 
     // Function to play sound effect 2
@@ -86,32 +88,19 @@ export class Ball {
 
         // Check for scoring
         if (this.mesh.position.x <= -10) {
-            // this.reset();
-            if (this.scoreTracker.incrementPlayer2Score(this.duplicateCounter))
+            if (this.scoreTracker.incrementPlayer2Score(this.duplicateCounter, this.duplicateBall))
                 this.reset();
+            this.playSoundBozo();
+            
         }
         else if (this.mesh.position.x >= 10) {
-            // this.reset();
-            if (this.scoreTracker.incrementPlayer1Score(this.duplicateCounter))
+            if (this.scoreTracker.incrementPlayer1Score(this.duplicateCounter, this.duplicateBall))
                 this.reset();
+             this.playSoundBozo();
         }
     }
     
     checkWallCollision(wallMesh) {
-        if (!this.collisionManager) {
-            console.error("Collision manager is not defined.");
-            return false; // Exit early if collision manager is not defined
-        }
-        
-        if (!wallMesh || !this.mesh || !this.velocity || !this.raycaster) {
-            console.error("One or more required parameters are undefined.");
-            console.log("wallMesh:", wallMesh);
-            console.log("this.mesh:", this.mesh);
-            console.log("this.velocity:", this.velocity);
-            console.log("this.raycaster:", this.raycaster);
-            return false; // Exit early if any required parameter is undefined
-        }
-    
         return this.collisionManager.checkCollisionWall(wallMesh, this.mesh, this.velocity, this.raycaster);
     }
 

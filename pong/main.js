@@ -1,55 +1,122 @@
-import { BallContainer } from './BallContainer.js';
-import { Gui } from './Gui.js';
-import { Wall } from './Wall.js';
-import { Paddle } from './Paddle.js';
-import { ScoreTracker } from './ScoreTracker.js';
-import { EndGameManager } from './EndGameManager.js';
-import { Scene } from './Scene.js';
-import { objectConfigs } from './config.js';
+import { Game } from './Game.js';
+import { Configs } from './config.js';
 
 
-//Create my scene
-const myScene = new Scene();
-const scene = myScene.getScene();
-const camera = myScene.getCamera();
-const renderer = myScene.getRenderer();
+let game = null;
+let isGameInitialized = false;
+let animationFrameId = null;
+const originalConfigs = Configs; // Store the original configuration
 
-// Create GUI, EndGameManager and scoreTracker
-const gui = new Gui(scene, objectConfigs.playerInfo);
-await gui.initGui();
+document.addEventListener('DOMContentLoaded', function() {
+    const startMenu = document.getElementById('startMenu');
+    startMenu.style.display = 'block';
 
-const endGameManager = new EndGameManager(scene, gui, objectConfigs.ballConfigurations.duplicateBall);
-const scoreTracker = new ScoreTracker(gui, endGameManager, objectConfigs.playerInfo);
-endGameManager.setScoreTracker(scoreTracker);
+    document.getElementById('mode1').addEventListener('click', function() {
+        handleModeSelection(1);
+    });
 
-// Create ball container
-let ballContainer = new BallContainer(scene, objectConfigs.ballConfigurations, scoreTracker);
-endGameManager.setBallContainer(ballContainer);
-endGameManager.setBallConfigurations(objectConfigs.ballConfigurations);
-// Create walls
-const topWall = new Wall(scene, objectConfigs.walls.topWall);
-const bottomWall = new Wall(scene, objectConfigs.walls.bottomWall);
+    document.getElementById('mode2').addEventListener('click', function() {
+        handleModeSelection(2);
+    });
 
-// Create paddles
-const leftPaddle = new Paddle(scene, objectConfigs.paddles.leftPaddle, [topWall, bottomWall]);
-const rightPaddle = new Paddle(scene, objectConfigs.paddles.rightPaddle, [topWall, bottomWall]);
+    document.getElementById('mode3').addEventListener('click', function() {
+        handleModeSelection(3);
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'm') {
+            stopGame();
+        }
+    });
+});
+
+function deepCopy(obj) {
+    if (typeof obj !== 'object' || obj === null) {
+        return obj; // Return primitive types and null as-is
+    }
+
+    // Create an empty object/array of the same type as obj
+    const newObj = Array.isArray(obj) ? [] : {};
+
+    // Iterate through each property of obj
+    for (let key in obj) {
+        // Special handling for THREE.Vector3 objects
+        if (obj[key] instanceof THREE.Vector3) {
+            newObj[key] = new THREE.Vector3().copy(obj[key]);
+        } else {
+            // Recursively copy nested properties
+            newObj[key] = deepCopy(obj[key]);
+        }
+    }
+
+    return newObj; // Return the new deep copy
+}
+
+async function handleModeSelection(mode) {
+    if (game) {
+        stopGame();
+    }
+
+    // Create a deep copy of the original configuration
+    let newConfig = deepCopy(originalConfigs);
+
+    // Modify the configuration based on the selected mode
+    if (mode === 2) {
+        newConfig.ballConfigurations.duplicateBall = 1;
+    } else if (mode === 3) {
+        newConfig.paddles.leftPaddle.height = 10;
+        newConfig.paddles.rightPaddle.height = 10;
+    }
+
+    game = new Game();
+    document.getElementById('startMenu').style.display = 'none';
+    await game.initialize(newConfig);
+    isGameInitialized = true;
+
+    renderGameScene(); // Render the game scene
+    animate();
+}
+
+function renderGameScene() {
+    const gameContainer = document.getElementById('gameContainer');
+    // Clear the container
+    gameContainer.innerHTML = '';
+    // Append the new scene to the container
+    gameContainer.appendChild(game.renderer.domElement);
+}
+
+function stopGame() {
+    if (game) {
+        game.clearScene();
+        game = null;
+        isGameInitialized = false; // Reset the initialization flag
+    }
+    cancelAnimationFrame(animationFrameId);
+    document.getElementById('startMenu').style.display = 'block';
+}
 
 let isPaused = false;
-let timeScale = 1; // Normal time scale
+let timeScale = 1;
 
-// Function to handle key press event
 function handleKeyPress(event) {
-    // Check if the pressed key is 'p'
     if (event.key === 'p') {
-        // Toggle pause
         togglePause();
+    } else if (event.key === 'r') {
+        resetGame();
     }
 }
 
-// Add event listener for 'keydown' event
+function resetGame() {
+    if (game && game.endGameManager) {
+        game.endGameManager.resetGame();
+        if (isPaused) {
+            togglePause();
+        }
+    }
+}
+
 document.addEventListener('keydown', handleKeyPress);
 
-// Function to toggle pause
 function togglePause() {
     isPaused = !isPaused;
     if (isPaused) {
@@ -58,30 +125,23 @@ function togglePause() {
     } else {
         // Resume the game
         timeScale = 1; // Set time scale back to normal
+        requestAnimationFrame(animate); // Restart animation loop if resumed
     }
 }
 
 function animate() {
-    requestAnimationFrame(animate);
 
-    if (endGameManager.doReset) {
-        endGameManager.resetGame();
-        if (isPaused)
-            togglePause();
+    // Render the frame
+    if (!isPaused && game) { // Check if game is not paused
+        game.leftPaddle.update();
+        game.rightPaddle.update();
+        game.ballContainer.update(game.leftPaddle.mesh, game.rightPaddle.mesh, game.topWall, game.bottomWall);
+        game.renderer.render(game.scene, game.camera);
     }
 
-    if (!isPaused) {
-        // Update paddles' position
-        leftPaddle.update();
-        rightPaddle.update();
-
-        ballContainer.update(leftPaddle.mesh, rightPaddle.mesh, topWall, bottomWall);
-
-        // Render the scene
-        renderer.render(scene, camera);
+    // Request next frame
+    if (!isPaused) { // Request next frame only if not paused
+        animationFrameId = requestAnimationFrame(animate);
     }
 }
 
-
-// Call animate
-animate();

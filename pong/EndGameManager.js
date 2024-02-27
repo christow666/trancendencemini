@@ -7,9 +7,9 @@ export class EndGameManager {
         this.gui = gui;
         this.animationFrameId = null; // Declare animationFrameId at the class level
 
-        // Bind event listener for keydown event
-        this.handleKeyPress = this.handleKeyPress.bind(this);
-        document.addEventListener('keydown', this.handleKeyPress);
+        // // Bind event listener for keydown event
+        // this.handleKeyPress = this.handleKeyPress.bind(this);
+        // document.addEventListener('keydown', this.handleKeyPress);
     }
 
     setBallConfigurations(ballConfigurations) {
@@ -24,17 +24,17 @@ export class EndGameManager {
         this.ballContainer = ballContainer; // Assign the provided ballContainer instance
     }
 
-    // Method to handle key press event
-    handleKeyPress(event) {
-        if (event.key === 'r') {
-            const currentTime = Date.now();
-            // Check if at least one second has elapsed since the last reset
-            if (currentTime - this.lastResetTime >= 10) {
-                this.doReset = true;
-                this.lastResetTime = currentTime; // Update the last reset time
-            }
-        }
-    }
+    // // Method to handle key press event
+    // handleKeyPress(event) {
+    //     if (event.key === 'r') {
+    //         const currentTime = Date.now();
+    //         // Check if at least one second has elapsed since the last reset
+    //         if (currentTime - this.lastResetTime >= 10) {
+    //             this.doReset = true;
+    //             this.lastResetTime = currentTime; // Update the last reset time
+    //         }
+    //     }
+    // }
 
     
     // End game method

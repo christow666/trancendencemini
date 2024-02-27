@@ -9,9 +9,12 @@ export class ScoreTracker {
     }
 
     // Method to increment player 1's score
-    incrementPlayer1Score(ballValue) {
+    incrementPlayer1Score(ballValue, isDuplicateMode) {
         // this.player1Score++;
-        this.player1Score+= ballValue;
+        if (isDuplicateMode)
+            this.player1Score+= ballValue;
+        else
+            this.player1Score++;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
         if (this.player1Score >= 50) {
             console.log("p1 win")
@@ -22,9 +25,12 @@ export class ScoreTracker {
     }
 
     // Method to increment player 2's score
-    incrementPlayer2Score(ballValue) {
+    incrementPlayer2Score(ballValue, isDuplicateMode) {
         // this.player2Score++;
-        this.player2Score+= ballValue;
+        if (isDuplicateMode)
+            this.player2Score+= ballValue;
+        else
+            this.player2Score++;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
         if (this.player2Score >= 50) {
             console.log("p2 win")

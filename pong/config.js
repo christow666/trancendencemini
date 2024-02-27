@@ -1,6 +1,6 @@
 // config.js
 
-export const objectConfigs = {
+export const Configs = {
     walls: {
         topWall: {
             width: 15,
@@ -20,7 +20,7 @@ export const objectConfigs = {
     paddles: {
         leftPaddle: {
             width: 1,
-            height: 10,
+            height: 4,
             depth: 1,
             speed: 0.1,
             color: 0xff0000,
@@ -29,7 +29,7 @@ export const objectConfigs = {
         },
         rightPaddle: {
             width: 1,
-            height: 10,
+            height: 4,
             depth: 1,
             speed: 0.1,
             color: 0xff0000,
@@ -44,7 +44,7 @@ export const objectConfigs = {
         color: 0xff0000,
         maxVelocity: 0.1,
         numberOfBalls: 1,
-        duplicateBall: 1
+        duplicateBall: 0
     },
     playerInfo: {
         player1Name: "NANI",
