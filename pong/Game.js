@@ -7,7 +7,8 @@ import { EndGameManager } from './EndGameManager.js';
 import { Scene } from './Scene.js';
 
 export class Game {
-    constructor() {
+    constructor(gameManager) {
+        this.gameManager =gameManager;
         this.scene = null;
         this.camera = null;
         this.renderer = null;
@@ -33,8 +34,8 @@ export class Game {
         this.gui = new Gui(this.scene, newConfig.playerInfo);
         await this.gui.initGui();
 
-        this.endGameManager = new EndGameManager(this.scene, this.gui, newConfig.ballConfigurations.duplicateBall);
-        this.scoreTracker = new ScoreTracker(this.gui, this.endGameManager, newConfig.playerInfo);
+        this.endGameManager = new EndGameManager(this.scene, this.gui, newConfig.ballConfigurations.duplicateBall, this.gameManager);
+        this.scoreTracker = new ScoreTracker(this.gui, this.endGameManager, newConfig.playerInfo, this);
         this.endGameManager.setScoreTracker(this.scoreTracker);
 
         // Create ball container

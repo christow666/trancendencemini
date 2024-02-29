@@ -1,5 +1,6 @@
 export class EndGameManager {
-    constructor(scene, gui, duplacateBall) {
+    constructor(scene, gui, duplacateBall, gameManager) {
+        this.gameManager = gameManager;
         this.scene = scene;
         this.doReset = false;
         this.duplicateBall = duplacateBall;
@@ -39,6 +40,7 @@ export class EndGameManager {
         this.ballContainer.balls.forEach(ball => {
             ball.freeze(); // Freeze all balls
         });
+        this.gameManager.togglePause();
         this.gui.showEndGameMessage(winnerName);
     }
 
@@ -76,6 +78,10 @@ export class EndGameManager {
         this.leftPaddle.reset();
         this.rightPaddle.reset(); 
 
+    }
+
+    hideEndGameMessage() {
+        this.gui.hideEndGameMessage();
     }
 
     removeFromContainer(ball) {

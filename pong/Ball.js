@@ -18,8 +18,9 @@ export class Ball {
         this.mesh.position.copy(ballConfigurations.position); // Set ball position
 
         // Set initial velocity of the ball
-        this.velocity.x = 0.1 * (Math.random() > 0.5 ? 1 : -1); // Reset ball velocity (randomize direction)
+        this.velocity.x = 0.1 * (Math.random() > 0.5 ? 1 : -1);// (randomize direction)
         this.velocity.y = Math.random() * 0.1 - 0.05;
+        this.velocity.y = parseFloat((Math.random() * 0.1 - 0.05).toFixed(2));
         this.velocity.clampLength(0, this.speed);
 
         // Add the ball mesh to the scene
