@@ -47,8 +47,17 @@ export class Game {
         this.bottomWall = new Wall(this.scene, newConfig.walls.bottomWall);
 
         // Create paddles
-        this.leftPaddle = new Paddle(this.scene, newConfig.paddles.leftPaddle, [this.topWall, this.bottomWall]);
-        this.rightPaddle = new Paddle(this.scene, newConfig.paddles.rightPaddle, [this.topWall, this.bottomWall]);
+        this.leftPaddle = new Paddle(this.scene, newConfig.paddles.leftPaddle, [this.topWall, this.bottomWall], newConfig.paddles.leftPaddle.isAI);
+        this.rightPaddle = new Paddle(this.scene, newConfig.paddles.rightPaddle, [this.topWall, this.bottomWall], newConfig.paddles.rightPaddle.isAI);
+
+        this.endGameManager.setLeftpaddle(this.leftPaddle);
+        this.endGameManager.setRightpaddle(this.rightPaddle);
+        
+        if (newConfig.paddles.rightPaddle.isAI)
+            this.rightPaddle.setBallContainer(this.ballContainer);
+        if (newConfig.paddles.leftPaddle.isAI)
+            this.leftPaddle.setBallContainer(this.ballContainer);
+
 
     }
 

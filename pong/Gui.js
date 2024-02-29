@@ -4,6 +4,7 @@ export class Gui {
         this.scene = scene;
         this.player1Name = playerInfo.player1Name;
         this.player2Name = playerInfo.player2Name;
+        this.gameModeName = playerInfo.gameModeName;
         this.numberMeshes = []; // Initialize numberMeshes as an empty array
         this.playerScores = {
             1: { score: 0, position: { x: -4, y: 5.5, z: 0 } }, // Initial score and position for player 1
@@ -13,7 +14,7 @@ export class Gui {
 
     async initGui() {
         await this.createFont(); // Load the font
-        this.createPongText("DupliPong");
+        this.createPongText(this.gameModeName);
         this.createPlayerNameText(this.player1Name, { x: -7, y: 5.5, z: 0 });
         this.createPlayerNameText(this.player2Name, { x: 3, y: 5.5, z: 0 });
         this.createEndGameMessage();

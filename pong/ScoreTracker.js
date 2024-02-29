@@ -6,6 +6,7 @@ export class ScoreTracker {
         this.player2Name = playerInfo.player2Name;
         this.gui = gui;
         this.endGameManager = endGameManager;
+        this.gameWinningScore = playerInfo.gameWinningScore;
     }
 
     // Method to increment player 1's score
@@ -15,7 +16,7 @@ export class ScoreTracker {
         else
             this.player1Score++;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
-        if (this.player1Score >= 50) {
+        if (this.player1Score >= this.gameWinningScore) {
             console.log("p1 win")
             this.endGameManager.endGame(this.player1Name);
             return 0;
@@ -30,7 +31,7 @@ export class ScoreTracker {
         else
             this.player2Score++;
         this.gui.updatePlayerScores(this.player1Score, this.player2Score);
-        if (this.player2Score >= 50) {
+        if (this.player2Score >= this.gameWinningScore) {
             console.log("p2 win")
             this.endGameManager.endGame(this.player2Name);
             return 0

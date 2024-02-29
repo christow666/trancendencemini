@@ -4,6 +4,7 @@ export class Ball {
         this.scene = scene;
         this.container = container;
         this.collisionManager = collisionManager;
+        this.ballConfigurations = ballConfigurations;
         this.geometry = new THREE.SphereGeometry(ballConfigurations.size, 32, 32);
         this.material = new THREE.MeshStandardMaterial({ color: ballConfigurations.color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -11,6 +12,7 @@ export class Ball {
         this.maxVelocity = ballConfigurations.maxVelocity;
         this.duplicateBall = ballConfigurations.duplicateBall;
         this.scoreTracker = scoreTracker;
+        this.speed = ballConfigurations.speed;
 
         // Set initial position of the ball
         this.mesh.position.copy(ballConfigurations.position); // Set ball position
@@ -18,9 +20,7 @@ export class Ball {
         // Set initial velocity of the ball
         this.velocity.x = 0.1 * (Math.random() > 0.5 ? 1 : -1); // Reset ball velocity (randomize direction)
         this.velocity.y = Math.random() * 0.1 - 0.05;
-        this.velocity.clampLength(0, 0.05);
-        // this.velocity.x = 0.01; // Reset ball velocity (randomize direction)
-        // this.velocity.y = 0.005;
+        this.velocity.clampLength(0, this.speed);
 
         // Add the ball mesh to the scene
         this.scene.add(this.mesh);
@@ -42,7 +42,7 @@ export class Ball {
         this.duplicateCounter = 0;
 
         // Set audio
-        // this.soundBozo = new Audio('./bozo.mp3');
+        this.soundBozo = new Audio('./bozo.mp3');
     }
 
     // Function to play sound effect 1
@@ -82,13 +82,13 @@ export class Ball {
         if (this.mesh.position.x <= -10) {
             if (this.scoreTracker.incrementPlayer2Score(this.duplicateCounter, this.duplicateBall))
                 this.reset();
-            // this.playSoundBozo();
+            this.playSoundBozo();
             
         }
         else if (this.mesh.position.x >= 10) {
             if (this.scoreTracker.incrementPlayer1Score(this.duplicateCounter, this.duplicateBall))
                 this.reset();
-            //  this.playSoundBozo();
+             this.playSoundBozo();
         }
     }
     
@@ -116,18 +116,12 @@ export class Ball {
         else {
             this.mesh.material.color.set(0xff0000);
             // Create a new ball by cloning the current ball
-            const oppositeBall = new Ball(this.scene, {
-                position: this.mesh.position.clone(), // Clone current ball's position
-                velocity: new THREE.Vector3(-this.velocity.x, -this.velocity.y, 0), // Reverse y velocity
-                size: this.geometry.parameters.radius, // Use current ball's size
-                color: this.material.color.getHex(), // Use current ball's color
-                maxVelocity: this.maxVelocity, // Use current ball's max velocity
-                duplicateBall: this.duplicateBall,
-            }, this.scoreTracker, this.container, this.collisionManager);
+            const oppositeBall = new Ball(this.scene, this.ballConfigurations, this.scoreTracker, this.container, this.collisionManager);
+            oppositeBall.mesh.position.copy(this.mesh.position);
             const randomMultiplier = 0.75 + Math.random() * 0.2; // Random number between 0.75 and 1.25
             oppositeBall.velocity.x = this.velocity.x * randomMultiplier;
             oppositeBall.velocity.y = -this.velocity.y;
-
+            this.velocity.clampLength(0, this.speed);
             // Add the new ball to the container
             this.container.balls.push(oppositeBall);
 
@@ -153,10 +147,7 @@ export class Ball {
         this.mesh.position.set(0, 0, 0); // Reset ball position to z = 0
         this.velocity.x = 0.1 * (Math.random() > 0.5 ? 1 : -1); // Reset ball velocity (randomize direction)
         this.velocity.y = Math.random() * 0.1 - 0.05;
-        // this.velocity.y = 0;
-
-        // Ensure maximum velocity
-        this.velocity.clampLength(0, 0.05);
+        this.velocity.clampLength(0, this.speed);
         this.maxVelocity = 0.1;
         this.duplicateCounter = 0;
         this.mesh.material.color.set(0xff0000);

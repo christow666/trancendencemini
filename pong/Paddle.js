@@ -1,9 +1,18 @@
+import { AI } from './AI.js'
+
 export class Paddle {
-    constructor(scene, config, walls) {
+    constructor(scene, config, walls, isAI) {
         this.geometry = new THREE.BoxGeometry(config.width, config.height, config.depth);
         this.material = new THREE.MeshStandardMaterial({ color: config.color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.scene = scene;
+        this.isAI = isAI;
+        this.height = config.height;
+        this.BallContainer = null;
+        this.isLeft = config.isLeft;
+        this.config = config;
+        if (isAI)  
+            this.AI = new AI(this, walls, config.AIInitialDelay);
 
         // Set initial position of the paddle
         this.mesh.position.copy(config.position);
@@ -37,6 +46,14 @@ export class Paddle {
         this.walls = walls;
     }
 
+    setBallContainer(ballContainer) {
+        this.ballContainer = ballContainer;
+        // If the paddle is AI, update AI with the new BallContainer instance
+        if (this.isAI && this.AI) {
+            this.AI.setBallContainer(ballContainer);
+        }
+    }
+
     // Event handlers for keydown and keyup events
     handleKeyDown(event) {
         if (event.key === this.controls.up) {
@@ -56,11 +73,16 @@ export class Paddle {
 
     // Update paddle position based on key events
     update() {
-        if (this.moveUp && !this.checkWallCollision(this.walls, new THREE.Vector3(0, 1, 0))) {
-            this.mesh.position.y += this.speed;
+        if (!this.isAI) {
+            if (this.moveUp && !this.checkWallCollision(this.walls, new THREE.Vector3(0, 1, 0))) {
+                this.mesh.position.y += this.speed;
+            }
+            if (this.moveDown && !this.checkWallCollision(this.walls, new THREE.Vector3(0, -1, 0))) {
+                this.mesh.position.y -= this.speed;
+            }
         }
-        if (this.moveDown && !this.checkWallCollision(this.walls, new THREE.Vector3(0, -1, 0))) {
-            this.mesh.position.y -= this.speed;
+        else {
+            this.AI.update();
         }
     }
 
@@ -80,5 +102,9 @@ export class Paddle {
         }
 
         return false; // No collision detected with any wall
+    }
+
+    reset() {
+        this.mesh.position.y = this.config.position.y;
     }
 }

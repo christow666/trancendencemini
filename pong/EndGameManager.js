@@ -5,11 +5,21 @@ export class EndGameManager {
         this.duplicateBall = duplacateBall;
         this.lastResetTime = 0;
         this.gui = gui;
+        this.leftPaddle = null;
+        this.rightPaddle = null;
         this.animationFrameId = null; // Declare animationFrameId at the class level
 
         // // Bind event listener for keydown event
         // this.handleKeyPress = this.handleKeyPress.bind(this);
         // document.addEventListener('keydown', this.handleKeyPress);
+    }
+
+    setLeftpaddle(leftPaddle){
+        this.leftPaddle =leftPaddle;
+    }
+
+    setRightpaddle(rightPaddle){
+        this.rightPaddle = rightPaddle;
     }
 
     setBallConfigurations(ballConfigurations) {
@@ -63,6 +73,8 @@ export class EndGameManager {
         this.gui.hideEndGameMessage();
         this.gui.resetScores();
         this.doReset = false;
+        this.leftPaddle.reset();
+        this.rightPaddle.reset(); 
 
     }
 

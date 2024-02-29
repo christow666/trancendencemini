@@ -36,10 +36,19 @@ class GameManager {
         let newConfig = this.deepCopy(this.originalConfigs);
 
         if (mode === 2) {
+            newConfig.playerInfo.gameWinningScore = 50;
             newConfig.ballConfigurations.duplicateBall = 1;
+            newConfig.playerInfo.gameModeName = "DupliPong";
+            newConfig.paddles.rightPaddle.isAI = 1;
+            newConfig.paddles.leftPaddle.isAI = 1;
         } else if (mode === 3) {
-            newConfig.paddles.leftPaddle.height = 10;
-            newConfig.paddles.rightPaddle.height = 10;
+            newConfig.playerInfo.gameWinningScore = 500;
+            newConfig.ballConfigurations.numberOfBalls = 100;
+            newConfig.playerInfo.gameModeName = "Vs AI";
+            newConfig.paddles.leftPaddle.height = 3;
+            newConfig.paddles.rightPaddle.height = 3;
+            newConfig.paddles.rightPaddle.isAI = 1;
+            newConfig.paddles.leftPaddle.isAI = 1;
         }
 
         this.game = new Game();
@@ -49,6 +58,18 @@ class GameManager {
 
         this.renderGameScene();
         this.animate();
+    }
+
+    animate() {
+        if (!this.isPaused && this.game) {
+            this.game.leftPaddle.update();
+            this.game.rightPaddle.update();
+            this.game.ballContainer.update(this.game.leftPaddle.mesh, this.game.rightPaddle.mesh, this.game.topWall, this.game.bottomWall);
+            this.game.renderer.render(this.game.scene, this.game.camera);
+        }
+
+        if (!this.isPaused)
+            this.animationFrameId = requestAnimationFrame(() => this.animate());
     }
 
     renderGameScene() {
@@ -91,18 +112,6 @@ class GameManager {
         this.isPaused = !this.isPaused;
         if (!this.isPaused)
             requestAnimationFrame(() => this.animate());
-    }
-
-    animate() {
-        if (!this.isPaused && this.game) {
-            this.game.leftPaddle.update();
-            this.game.rightPaddle.update();
-            this.game.ballContainer.update(this.game.leftPaddle.mesh, this.game.rightPaddle.mesh, this.game.topWall, this.game.bottomWall);
-            this.game.renderer.render(this.game.scene, this.game.camera);
-        }
-
-        if (!this.isPaused)
-            this.animationFrameId = requestAnimationFrame(() => this.animate());
     }
 
     deepCopy(obj) {
